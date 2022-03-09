@@ -2,6 +2,7 @@
 ## FUNCTION CLASS DESTINATED TO DOWNLOAD TABLES FROM GS, SHAREPOINT, FTP ORMONGO  
 # Created 12/02/2022 by Jaime Polanco
 # Last modified  08/03/2022 by Jaime Polanco
+# sudo git clone https://github.com/JAPJ182/GCP_data_eng_functions.git
 class descarga:
     
     #### Cuenta de servicio proveniente del json
