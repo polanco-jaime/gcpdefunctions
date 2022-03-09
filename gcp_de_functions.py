@@ -24,9 +24,7 @@ import openpyxl
 import chardet
 import patool 
 ### conection requirements 
-!pip3 install py-topping
-!pip3 install Office365-REST-Python-Client==2.2.1
-!pip3 install pymongo
+ 
  
 
 from tqdm import tqdm
