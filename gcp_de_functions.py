@@ -3,6 +3,41 @@
 # Created 12/02/2022 by Jaime Polanco
 # Last modified  08/03/2022 by Jaime Polanco
 # sudo git clone https://github.com/JAPJ182/GCP_data_eng_functions.git
+
+##############################################
+# Requirements
+############################################## 
+from google.cloud import storage
+from google.cloud import bigquery
+import time
+from datetime import date, timedelta
+from datetime import datetime
+
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Email
+import pandas as pd
+import os
+import requests
+import zipfile
+import glob
+import re
+import openpyxl
+import chardet
+import patool 
+### conection requirements 
+!pip3 install py-topping
+!pip3 install Office365-REST-Python-Client==2.2.1
+!pip3 install pymongo
+ 
+
+from tqdm import tqdm
+import ftplib
+from io import BytesIO
+from office365.runtime.auth.authentication_context import AuthenticationContext
+from office365.sharepoint.client_context import ClientContext
+from office365.sharepoint.files.file import File
+import pymongo
+
 class descarga:
     
     #### Cuenta de servicio proveniente del json
