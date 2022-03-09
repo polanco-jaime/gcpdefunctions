@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 ## FUNCTION CLASS DESTINATED TO DOWNLOAD TABLES FROM GS, SHAREPOINT, FTP ORMONGO  
 # Created 12/02/2022 by Jaime Polanco
 # Last modified  08/03/2022 by Jaime Polanco
