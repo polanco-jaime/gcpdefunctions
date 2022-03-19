@@ -8,6 +8,8 @@
 ############################################## 
 from google.cloud import storage
 from google.cloud import bigquery
+from google.oauth2 import service_account as sa
+
 import time
 from datetime import date, timedelta
 from datetime import datetime
@@ -22,7 +24,7 @@ import glob
 import re
 import openpyxl
 import chardet
-import patool 
+import patoolib 
 ### conection requirements 
  
  
@@ -40,7 +42,7 @@ class descarga:
     #### Cuenta de servicio proveniente del json
  
     ### Constructor
-    def __init__(self,tabla = "",bucket="" ,project_id="" , service_account = """""""", source = "", 
+    def __init__(self,tabla = "",bucket="" ,project_id="" , service_account = {}, source = "", 
                 Usuario="",Contrasena="",Servidor="",Puerto="",Archivos=[""] ):  
         
         # Instance Variable 
@@ -54,14 +56,14 @@ class descarga:
         self.Servidor = Servidor
         self.Puerto = Puerto
         self.Archivos = Archivos
-        
+        self.credentials = sa.Credentials.from_service_account_info( service_account   )  
         
         ### setting conection and getting the last table    
     def blod_add(self):
         
         if self.source=='GCP':
             
-            client = storage.Client(self.cuenta )
+            client = storage.Client(credentials=self.credentials, project=self.credentials.project_id,)
             bucket = client.get_bucket(self.bucket)
             blobs = bucket.list_blobs()
             print("Conection with {} is ok".format(bucket))
@@ -116,7 +118,7 @@ class descarga:
     def download_rep_blob( self ):
         
         if self.source=='GCP': 
-            client = storage.Client(self.cuenta )
+            client = storage.Client(credentials=self.credentials, project=self.credentials.project_id,)
             bucket = client.bucket(self.bucket)
             self.source_blob_name = self.blod_add()
             self.formato = '.' + self.source_blob_name[0].split('.')[-1] 
@@ -293,7 +295,7 @@ class read_load_class:
             pass
     def read_table(self):
         start = time.time()
-        bq_client = bigquery.Client(self.cuenta)
+        bq_client = bigquery.Client(credentials=self.credentials, project=self.credentials.project_id,)
 
         def normalize_(s):
                 replacements = (
@@ -303,22 +305,19 @@ class read_load_class:
                 ("ó", "o"),
                 ("ú", "u"), ("ñ", "n"), ("*",""),
                 (".", "_"), ("/","_"),("\\", "_"),
-                ("1_", ""),("2_", ""),("3_", ""), ("4_", ""), ("5_", ""),("6_", ""),("7_", ""),    ('├í','a'),
-                ("├®","e"),
-                ('├¡','i'),
-                ('├│','o'),
-                ('├║','u'),
-                ('├▒','ni'),
+                ("1_", ""),("2_", ""),("3_", ""), ("4_", ""), ("5_", ""),("6_", ""),("7_", ""),   
+                ('├í','a'),  ("├®","e"), ('├¡','i'), ('├│','o'),
+                ('├║','u'),                ('├▒','ni'),
                 ('├ü','A'),('├Ç','A'),('├ç','A'),
-                ('├ë','E'),"├ë","E"),"├ê","E"),"╔","E"),
-                ('├ì','I'),"├î","I"),('├û','I'),('├Å','I'),
+                ('├ë','E'),("├ë","E"),("├ê","E"),("╔","E"),
+                ('├ì','I'),("├î","I"),('├û','I'),('├Å','I'),
                 ('├ô','O'),('├ï','O'),('├è','O'),
                 ('├Ö','U'),
-                ('├æ','Ñ'),('├É','ni'),('├æ','Ñ'),'Ð','ni'),
+                ('├æ','Ñ'),('├É','ni'),('├æ','Ñ'),('Ð','ni'),
                 ('├Ü','U'),
-                ('├û','Í'  )  
-                 
-                ("8_", ""),("9_", ""),("¿", ""),("?", ""),(" ", "_"),(",", "_"),("__", "_"),("-", ""))
+                ('├û','Í'  )  ,  ("8_", ""),("9_", "")    ,
+                ("¿", ""),("?", ""),(" ", "_"),(",", "_"),("__", "_"),("-", "")
+                )
                 for a, b in replacements:
                   s = s.replace(a, b).replace(a.upper(), b.upper()).strip()
                 return s        
@@ -343,7 +342,7 @@ class read_load_class:
         #### Loading table on BQ
 
     def loading_in_bq(self):      
-        bq_client = bigquery.Client() 
+        bq_client = bigquery.Client(credentials=self.credentials, project=self.credentials.project_id,)
         ### JAIME MK TU YO DEL PASADO TE RECUERDA QUE NO PUEDES OLVIDAR EL PUTO GUION BAJO
         ##### NO OLVIDAR
         ### Tengo que cambiar el guin abajo #############################################################################
@@ -432,4 +431,3 @@ class read_load_class:
         end = time.time()
         total= end - self.start
         return print('timepo total de cargue '+str( round(total/60, 0) ) + ' minutos')
-                    
