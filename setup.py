@@ -1,36 +1,74 @@
-from setuptools import setup
-import os
-with open('requirements.txt') as f:
-    required = f.read().splitlines()
-setup(
-    # Needed to silence warnings (and to be a worthwhile package)
-    name='GCP_data_eng_functions',
-    url= 'https://github.com/JAPJ182/GCP_data_eng_functions',
-    author='Jaime Polanco Ladan',
-    author_email='jaime.polanco@javeriana.edu.co',
-    # Needed to actually package something
-    packages=['gdp_dataeng_functions'],
-    # Needed for dependencies
-    install_requires=required,
-#     install_requires=['chardet==4.0.0',
-#                         'office365==0.3.15',
-#                         'Office365_REST_Python_Client', #==2.2.1,
-#                         'openpyxl==3.0.9',
-#                         'pandas==1.3.1',
-#                         'protobuf==3.19.4',
-#                         'pymongo==4.0.1',
-#                         'pytz==2021.1',
-#                         'requests==2.25.1',
-#                         'sendgrid==6.9.6',
-#                         'tqdm==4.61.2',
-#                         'patool==1.12' , 'numpy' ],
-    # *strongly* suggested for sharing
-    version='0.1',
-    # The license can be anything you like
-    license='Jaime Polanco Development',
-    description='Ways for downloading the last file loaded into a specific bucket and way for loading this data into bigquery',
-    # We will also need a readme eventually (there will be a warning)
-    # long_description=open('README.txt').read(),
-)
-# if __name__ == "__main__":
-#     setup()
+# from setuptools import setup
+# import os
+# with open('requirements.txt') as f:
+#     required = f.read().splitlines()
+# setup(
+#     # Needed to silence warnings (and to be a worthwhile package)
+#     name='GCP_data_eng_functions',
+#     url= 'https://github.com/JAPJ182/GCP_data_eng_functions',
+#     author='Jaime Polanco Ladan',
+#     author_email='jaime.polanco@javeriana.edu.co',
+#     # Needed to actually package something
+#     packages=['gdp_dataeng_functions'],
+#     # Needed for dependencies
+#     install_requires=required,
+ 
+#     # *strongly* suggested for sharing
+#     version='0.1',
+#     # The license can be anything you like
+#     license='Jaime Polanco Development',
+#     description='Ways for downloading the last file loaded into a specific bucket and way for loading this data into bigquery',
+#     # We will also need a readme eventually (there will be a warning)
+#     # long_description=open('README.txt').read(),
+# )
+
+from setuptools import setup, find_packages
+from codecs import open
+from os import path
+
+__author__ = 'Jaime Polanco'
+__license__ = "japj182"
+__email__ = 'jaime.polanco@javeriana.edu.co'
+
+# Get the long description from the README file
+# with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+#    long_description = f.read()
+
+here = path.abspath(path.dirname(__file__))
+
+# Get the long description from the README file
+with open(path.join(here, 'README.md'), encoding='utf-8') as f:
+    long_description = f.read()
+
+with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
+    requirements = f.read().splitlines()
+
+
+setup(name='GCP_data_eng_functions',
+      version='0.1',
+      license='Jaime Polanco Development',
+      description='Ways for downloading the last file loaded into a specific bucket and way for loading this data into bigquery',
+      url='https://github.com/JAPJ182/GCP_data_eng_functions',
+      author='Jaime Polanco',
+      author_email='jaime.polanco@javeriana.edu.co',
+      classifiers=[
+          # How mature is this project? Common values are
+          #   3 - Alpha
+          #   4 - Beta
+          #   5 - Production/Stable
+          'Development Status :: 4 - Beta ',
+
+          # Indicate who your project is intended for
+          'Intended Audience :: Developers',
+          'Topic :: Software Development :: Build Tools',
+          # Specify the Python versions you support here. In particular, ensure
+          # that you indicate whether you support Python 2, Python 3 or both.
+          'Programming Language :: Python',
+          'Programming Language :: Python :: 3'
+      ],
+      keywords='dynamic-networks',
+      install_requires=requirements,
+      long_description=long_description,
+      long_description_content_type='text/markdown',
+#       packages=find_packages(exclude=["*.test", "*.test.*", "test.*", "test", "dynetx.test", "dynetx.test.*"]),
+      )
