@@ -13,8 +13,9 @@ dependencies:
 - requests==2.25.1
 - tqdm==4.61.2
 - patool==1.12
-- PyQt5
+
 pip:
   - sendgrid==6.9.6
   - office365
   - office365_rest_python_client
+  - PyQt5
