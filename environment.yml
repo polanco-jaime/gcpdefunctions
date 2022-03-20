@@ -15,5 +15,5 @@ dependencies:
 - patool==1.12
 pip:
   - sendgrid==6.9.6
-  - office365==0.3.15
-  - office365_rest_python_client==2.2.1
+  - office365
+  - office365_rest_python_client
