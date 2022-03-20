@@ -18,4 +18,6 @@ pip:
   - sendgrid==6.9.6
   - office365
   - office365_rest_python_client
+  - PyQt5Designer 
+  - PySide2
   - PyQt5
