@@ -227,13 +227,13 @@ class read_load_class:
     def delimitador(self):
         if (self.formato_.upper() == 'CSV') or (self.formato_.upper() == 'TXT'):
             self.encode = self.econde_tabla( )
-            if pd.read_csv(self.tabla, sep=',', encoding= encode , nrows = 1).shape[1]>4:
+            if pd.read_csv(self.tabla, sep=',', encoding= self.encode , nrows = 1).shape[1]>4:
                 sep_ = ','
-            elif pd.read_csv(self.tabla, sep=';', encoding= encode, nrows = 1).shape[1]>4:
+            elif pd.read_csv(self.tabla, sep=';', encoding= self.encode, nrows = 1).shape[1]>4:
                 sep_ = ';'
-            elif pd.read_csv(self.tabla, sep='|', encoding= encode, nrows = 1).shape[1]>4:
+            elif pd.read_csv(self.tabla, sep='|', encoding= self.encode, nrows = 1).shape[1]>4:
                 sep_ = '|'
-            elif pd.read_csv(self.tabla, sep=':', encoding= encode, nrows = 1).shape[1]>4:
+            elif pd.read_csv(self.tabla, sep=':', encoding= self.encode, nrows = 1).shape[1]>4:
                 sep_ = ':'  
             else:
                 pass  
