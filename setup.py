@@ -47,7 +47,7 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
 setup(name='GCP_data_eng_functions',
       version='0.1.0',
       license='Jaime Polanco Development',
-      packages=['gdp_dataeng_functions' ] , 
+      packages=['gdp_dataeng_functions' , exclude=["test"] ] , 
       description='Ways for downloading the last file loaded into a specific bucket and way for loading this data into bigquery',
       url='https://github.com/JAPJ182/GCP_data_eng_functions',
       author='Jaime Polanco',
