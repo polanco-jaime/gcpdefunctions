@@ -189,7 +189,7 @@ class descarga:
                         print(f"Descargado archivo {self.Archivo} de FTP con éxito")
                   ########################################### AUTENTICACION CON MONGO ###########################################
             elif(self.source =="MONGO"):
-                    uri = f"mongodb://{Usuario}:{Contrasena}@{self.Servidor}:{self.Puerto}"
+                    uri = f"mongodb://{self.Usuario}:{self.Contrasena}@{self.Servidor}:{self.Puerto}"
                     self.Database = pymongo.MongoClient(uri,unicode_decode_error_handler='ignore')         
                     
         else:
