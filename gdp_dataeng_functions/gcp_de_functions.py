@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ## FUNCTION CLASS DESTINATED TO DOWNLOAD TABLES FROM GS, SHAREPOINT, FTP ORMONGO  
 # Created 12/02/2022 by Jaime Polanco
-# Last modified  22/03/2022 by Jaime Polanco adapated for python 2 and 3
+# Last modified  08/03/2022 by Jaime Polanco
 # sudo git clone https://github.com/JAPJ182/GCP_data_eng_functions.git
 
 ##############################################
@@ -347,7 +347,7 @@ class read_load_class:
         ### JAIME MK TU YO DEL PASADO TE RECUERDA QUE NO PUEDES OLVIDAR EL PUTO GUION BAJO
         ##### NO OLVIDAR
         ### Tengo que cambiar el guin abajo #############################################################################
-        table_in_bq = self.tabla.split('/')[-1].split('.')[0]+'_'
+        table_in_bq = self.tabla.split('/')[-1].split('.')[0]
         temp_dataset = 'STAGING_SECRETARIA_SALUD'
         #self.Dataset 
         Table_read = self.read_table()
