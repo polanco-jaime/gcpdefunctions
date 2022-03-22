@@ -211,7 +211,7 @@ class read_load_class:
         self.Dataset = Dataset
         self.Correos = correos
         self.SENDGRID_API_KEY = SENDGRID_API_KEY
- 
+        self.credentials = sa.Credentials.from_service_account_info( service_account   )  
 
     def econde_tabla(self): 
         if (self.formato_.upper() == 'CSV') or (self.formato_.upper() == 'TXT'):        
