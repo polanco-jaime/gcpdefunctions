@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 ## FUNCTION CLASS DESTINATED TO DOWNLOAD TABLES FROM GS, SHAREPOINT, FTP ORMONGO  
 # Created 12/02/2022 by Jaime Polanco
-# Last modified  22/03/2022 by Jaime Polanco
+# Last modified  22/03/2022 by Jaime Polanco adapated for python 2 and 3
 # sudo git clone https://github.com/JAPJ182/GCP_data_eng_functions.git
 
 ##############################################
 # Requirements
-############################################## 
+# ############################################# 
 from google.cloud import storage
 from google.cloud import bigquery
 from google.oauth2 import service_account as sa
@@ -160,7 +161,7 @@ class descarga:
             if(self.source =="SHAREPOINT"):
                     for i, self.Archivo in tqdm(enumerate(self.Archivos)):
                         
-                        print(f"Autenticando con sharepoint el archivo {self.Archivo}")
+                        print("Autenticando con sharepoint el archivo {}".format(self.Archivo))
                         url = self.Servidor+self.Archivo
                         ctx_auth = AuthenticationContext(url)
                         if ctx_auth.acquire_token_for_user(self.Usuario, self.Contrasena):
@@ -168,8 +169,8 @@ class descarga:
                             web = ctx.web
                             ctx.load(web)
                             ctx.execute_query()
-                            print(f"Autenticacion con sharepoint de archivo {self.Archivo} exitosa")
-                        print(f"Descargando archivo {self.Archivo} de Sharepoint...")
+                            print("Autenticacion con sharepoint de archivo {} exitosa".format(self.Archivo))
+                        print("Descargando archivo {} de Sharepoint...".format(self.Archivo))
                         response = File.open_binary(ctx, url)
                         # self.Archivo_Objeto.append(BytesIO())
                         # self.Archivo_Objeto[-1].write(response.content)
@@ -184,12 +185,12 @@ class descarga:
                     print("Autenticado con éxito en FTP")
                     for i, Archivo in tqdm(enumerate(self.Archivos)):
                         self.Archivo_Objeto.append(BytesIO())
-                        print(f"Descargando archivo {self.Archivo} de FTP...")
-                        FTP.retrbinary(f'RETR {Archivo}', self.Archivo_Objeto[-1].write)
-                        print(f"Descargado archivo {self.Archivo} de FTP con éxito")
+                        print("Descargando archivo {} de FTP...".format(self.Archivo))
+                        FTP.retrbinary('RETR {}'.format(Archivo), self.Archivo_Objeto[-1].write)
+                        print("Descargado archivo {} de FTP con éxito".format(self.Archivo))
                   ########################################### AUTENTICACION CON MONGO ###########################################
             elif(self.source =="MONGO"):
-                    uri = f"mongodb://{self.Usuario}:{self.Contrasena}@{self.Servidor}:{self.Puerto}"
+                    uri = "mongodb://{}:{}@{}:{}".format(self.Usuario, self.Contrasena, self.Servidor, self.Puerto)
                     self.Database = pymongo.MongoClient(uri,unicode_decode_error_handler='ignore')         
                     
         else:
@@ -261,7 +262,7 @@ class read_load_class:
         else:
             pass
         
-        return  print('reading parameters have been set');
+        print('reading parameters have been set');
 
 
     def unziping_(self ):
@@ -430,4 +431,4 @@ class read_load_class:
         #############################################################################
         end = time.time()
         total= end - self.start
-        return print('timepo total de cargue '+str( round(total/60, 0) ) + ' minutos')
+        print('timepo total de cargue '+str( round(total/60, 0) ) + ' minutos')
