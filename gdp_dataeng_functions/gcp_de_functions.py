@@ -1,6 +1,6 @@
 ## FUNCTION CLASS DESTINATED TO DOWNLOAD TABLES FROM GS, SHAREPOINT, FTP ORMONGO  
 # Created 12/02/2022 by Jaime Polanco
-# Last modified  08/03/2022 by Jaime Polanco
+# Last modified  22/03/2022 by Jaime Polanco
 # sudo git clone https://github.com/JAPJ182/GCP_data_eng_functions.git
 
 ##############################################
@@ -427,7 +427,7 @@ class read_load_class:
                     ) 
             sg = SendGridAPIClient(self.SENDGRID_API_KEY)
             response = sg.send(message)    
-#############################################################################
+        #############################################################################
         end = time.time()
         total= end - self.start
         return print('timepo total de cargue '+str( round(total/60, 0) ) + ' minutos')
