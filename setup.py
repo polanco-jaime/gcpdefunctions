@@ -20,11 +20,11 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
     requirements = f.read().splitlines()
 
 
-setup(name='GCP_data_eng_functions',
+setup(name='gcpdataengfunctions',
       version='0.1.1',
       license='Jaime Polanco Development',
       #package_dir={'':'gdp_dataeng_functions'},
-      packages=find_packages("gdp_dataeng_functions", exclude=["*.test", "*.test.*", "test.*", "test"]) ,
+      packages=find_packages("gcpdataengfunctions", exclude=["*.test", "*.test.*", "test.*", "test"]) ,
       description='Ways for downloading the last file loaded into a specific bucket and way for loading this data into bigquery',
       url='https://github.com/JAPJ182/GCP_data_eng_functions',
       author='Jaime Polanco',
