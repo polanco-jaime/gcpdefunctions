@@ -21,7 +21,7 @@ with open(path.join(here, 'requirements.txt'), encoding='utf-8') as f:
 
 
 setup(name='gcpdataengfunctions',
-      version='0.1.1',
+      version='0.1.2',
       license='Jaime Polanco Development',
       #package_dir={'':'gdp_dataeng_functions'},
       packages=find_packages("gcpdataengfunctions", exclude=["*.test", "*.test.*", "test.*", "test"]) ,
