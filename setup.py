@@ -26,7 +26,7 @@ setup(name='gcpdataengfunctions',
       #package_dir={'':'gdp_dataeng_functions'},
       packages=find_packages("gcpdataengfunctions", exclude=["*.test", "*.test.*", "test.*", "test"]) ,
       description='Ways for downloading the last file loaded into a specific bucket and way for loading this data into bigquery',
-      url='https://github.com/JAPJ182/GCP_data_eng_functions',
+      url='https://github.com/JAPJ182/gcpdataengfunctions',
       author='Jaime Polanco',
       author_email='jaime.polanco@javeriana.edu.co',
       classifiers=[
