@@ -1,4 +1,5 @@
-name: GCP_data_eng_functions
+name: gcpdataengfunctions
+
 channels:
 - conda-forge
 - defaults
