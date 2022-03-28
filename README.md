@@ -1,2 +1,2 @@
 # Jaime Polanco GCP function
-pip install GCP_data_eng_functions
+pip3 install git+https://github.com/JAPJ182/gcpdataengfunctions.git
