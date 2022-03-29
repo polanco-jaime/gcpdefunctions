@@ -12,7 +12,7 @@ dependencies:
 - pymongo==4.0.1
 - pytz==2021.1
 - requests==2.25.1
-- tqdm==4.61.2
+- tqdm #==4.61.2
 - patool==1.12
 
 pip:
