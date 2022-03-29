@@ -139,7 +139,7 @@ class descarga:
             try:
                 blob1.download_to_filename( self.destination_file_name)
                 upload_blob(self.bucket_dest,self.tabla, self.destination_file_name, self.source_blob_name[0])
-                #delete_blob(self.bucket, self.source_blob_name)
+                delete_blob(self.bucket, self.source_blob_name)
                 print('ok')
             except: 
                 'error'
