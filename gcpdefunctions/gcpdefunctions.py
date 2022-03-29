@@ -198,7 +198,7 @@ class descarga:
             
             
 class read_load_class:
-    def __init__(self,tabla_de_interes = [] ,Dataset="",correos=[""],project_id="",SENDGRID_API_KEY="" , service_account = """"""""):  
+    def __init__(self,tabla_de_interes = [] ,Dataset="",correos=[""],project_id="",SENDGRID_API_KEY="" , service_account = {}):  
         
         # Instance Variable 
         self.tabla = tabla_de_interes[0]
@@ -284,7 +284,7 @@ class read_load_class:
             "i need to get the table and then read, normalize colnames and then sent to bq"
         
         elif (self.formato_.upper() == 'CSV'  or self.formato_.upper() == 'TXT' ) :
-            Data  =  pd.read_csv(self.file_, sep=self.delimitador(), encoding= self.econde_tabla() )
+            Data  =  pd.read_csv(self.tabla, sep=self.delimitador(), encoding= self.econde_tabla() )
             
             return Data
         elif (self.formato_.upper() == 'XLS' or self.formato_.upper() == 'XLSX' ):    
