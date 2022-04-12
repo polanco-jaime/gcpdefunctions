@@ -38,6 +38,88 @@ from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.files.file import File
 import pymongo
 
+
+
+
+ ##############################################################################################################
+ ##############################################################################################################
+ ##############################################################################################################
+
+
+
+
+class info_project:
+    #---------------------------------------------Constructor
+    def __init__(self, project_id = "", bucket = "", service_account = ""):
+        
+        # -------------------------------- Input variables
+        self.project_id = project_id
+        self.bucket = bucket #OPTIONAL
+        self.credentials = sa.Credentials.from_service_account_info( service_account )  
+
+        
+        # -------------------------------- Defined variable list initialization
+        self.bucket_list = []
+        self.bucket_list_names = []
+        self.full_blob_list = []
+        self.full_blob_list_names = []
+        self.bucket_list = []
+        self.bucket_list_names = []
+        
+        # -------------------------------- Definitions
+        
+        client_st = storage.Client(credentials = self.credentials, project = self.credentials.project_id)
+        
+        full_blob_list = []
+        full_blob_list_names = []
+        
+        bucket_list = list(client_st.list_buckets())
+        bucket_list_names = [bucket.name for bucket in client_st.list_buckets()]
+        
+        for bucket_i in bucket_list:
+            Bucket_i = client_st.get_bucket(bucket_i)
+            full_blob_list.append(list(Bucket_i.list_blobs()))
+            full_blob_list_names.append([blob.name for blob in Bucket_i.list_blobs()]) 
+        
+        try:
+            Bucket = client_st.get_bucket(bucket)
+            Bucket = self.Bucket
+            blob_in_bucket_list = list(Bucket.list_blobs())
+            blob_in_bucket_list_names = [blob.name for blob in Bucket.list_blobs()]
+        except:
+            Exception        
+                
+        # -------------------------------- Full variable list
+        self.client_st = client_st
+        self.project_id = project_id
+        self.bucket = bucket #OPTIONAL
+        self.bucket_list = bucket_list
+        self.bucket_list_names = bucket_list_names
+        self.full_blob_list = full_blob_list
+        self.full_blob_list_names = full_blob_list_names
+        self.blob_list_in_bucket = bucket_list
+        self.blob_list_in_bucket = bucket_list_names
+        
+    # -------------------------------- Other functions
+
+    def info_project(self):
+        print("Proyecto ", self.project_id,end=', ')
+        print("{} buckets.".format( len(self.bucket_list_names)), end=' ' )
+        print("Buckets name and # of blobs:")
+        for bucket_i in self.bucket_list:
+            Bucket_i = self.client_st.get_bucket(bucket_i)
+            print( bucket_i.name, len(list(Bucket_i.list_blobs())) )
+
+
+
+
+ ##############################################################################################################
+ ##############################################################################################################
+ ##############################################################################################################
+
+
+
+
 class descarga:
     
     #### Cuenta de servicio proveniente del json
@@ -195,7 +277,17 @@ class descarga:
                     
         else:
             print("The object you are looking for is not foundit into a Sharepoint, mongo or FTP object")
-            
+
+ 
+ 
+ 
+ 
+ ##############################################################################################################
+ ##############################################################################################################
+ ##############################################################################################################
+
+ 
+ 
             
 class read_load_class:
     def __init__(self,tabla_de_interes = [] ,Dataset="",correos=[""],project_id="",SENDGRID_API_KEY="" , service_account = {}):  
