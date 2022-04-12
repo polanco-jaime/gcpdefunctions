@@ -101,14 +101,20 @@ class info_project:
         self.blob_list_in_bucket = bucket_list_names
         
     # -------------------------------- Other functions
-
+    
     def info_project(self):
         print("Proyecto ", self.project_id,end=', ')
-        print("{} buckets.".format( len(self.bucket_list_names)), end=' ' )
+        print("{} buckets.".format( len(self.bucket_list_names)) )
         print("Buckets name and # of blobs:")
+        buckets = []
+        buckets_blob_count = []
         for bucket_i in self.bucket_list:
             Bucket_i = self.client_st.get_bucket(bucket_i)
-            print( bucket_i.name, len(list(Bucket_i.list_blobs())) )
+            buckets.append(bucket_i.name)
+            buckets_blob_count.append(len(list(Bucket_i.list_blobs())))
+            df_info = pd.DataFrame(zip(  buckets  , buckets_blob_count  ) )
+            df_info.columns = ['bucket','blob_count']
+        return(df_info)
 
 
 
