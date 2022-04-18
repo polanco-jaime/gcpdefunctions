@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 ## FUNCTION CLASS DESTINATED TO DOWNLOAD TABLES FROM GS, SHAREPOINT, FTP ORMONGO  
 # Created 12/02/2022 by Jaime Polanco
-# Last modified  22/03/2022 by Jaime Polanco
+# Last modified  18/04/2022 by Jaime Polanco
 # sudo git clone https://github.com/JAPJ182/GCP_data_eng_functions.git
 
 ##############################################
@@ -27,9 +27,6 @@ import openpyxl
 import chardet
 import patoolib 
 ### conection requirements 
- 
- 
-
 from tqdm import tqdm
 import ftplib
 from io import BytesIO
@@ -37,6 +34,7 @@ from office365.runtime.auth.authentication_context import AuthenticationContext
 from office365.sharepoint.client_context import ClientContext
 from office365.sharepoint.files.file import File
 import pymongo
+
 
 class descarga:
     
@@ -116,38 +114,61 @@ class descarga:
 
         #print("The file of interest {} corresponding to the date {} was found successfully".format(df.iloc[0,1].split("---")[-1] ,  df.iloc[0,1].split("---")[0] )
     #### Descarga de ultimo archivo            
+ 
     def download_rep_blob( self ):
         
         if self.source=='GCP': 
-            client = storage.Client(credentials=self.credentials, project=self.credentials.project_id,)
-            bucket = client.bucket(self.bucket)
-            self.source_blob_name = self.blod_add()
-            self.formato = '.' + self.source_blob_name[0].split('.')[-1] 
-            blob1 = bucket.blob(self.source_blob_name[0])
+            ## Setting parameters
+            self.storage_client = storage.Client(credentials=self.credentials, project=self.credentials.project_id,) # client service acount
+            self.source_blob_file = self.blod_add()
+            self.source_blob_name = self.source_blob_file[0]
+            self.formato = '.' + self.source_blob_name.split('.')[-1] 
+            
+ 
+             
             folder = self.tabla
             self.bucket_dest = 'archivos_cargados'
-            self.destination_file_name = self.tabla.replace('.xlsx', '').replace('.csv', '').replace('.XLSX', '').replace('.CSV', '').replace('.xls', '')  + self.formato
-            def upload_blob(self ):
-                Bucket = client.bucket(self.bucket_dest)
-                blob2 = Bucket.blob(self.tabla+'/'+self.source_blob_name[0])
-                blob2.upload_from_filename(self.destination_file_name)
-
-            def delete_blob(self ):
-                BUCKET = client.bucket(self.bucket)
-                blob3 = BUCKET.blob(self.source_blob_name[0])
-                blob3.delete()
+            self.destination_file_name = self.tabla.split('.')[0].upper().replace('.XLSX', '').replace('.CSV', '').replace('.XLS', '').replace('.ZIP', '').replace('.RAR', '')  + self.formato
+            ##################################
+            ######### setting download #########
+            ##################################
             try:
-                blob1.download_to_filename( self.destination_file_name)
-                upload_blob(self.bucket_dest,self.tabla, self.destination_file_name, self.source_blob_name[0])
-                delete_blob(self.bucket, self.source_blob_name)
-                print('ok')
-            except: 
-                'error'
-            print(
-                "Blob {} downloaded to {}.".format(self.source_blob_name[0], self.destination_file_name ) 
-                + "        " +
-                "El archivo {} se elimino correctamente del bucket {}.".format(self.source_blob_name[0], self.bucket )
-            )
+                self.bucket_download = self.storage_client .bucket(self.bucket)
+                blob_download = self.bucket_download.blob(self.source_blob_name)
+                blob_download.download_to_filename(self.destination_file_name)
+                print("Blob {} downloaded as {}.".format(self.source_blob_name, self.destination_file_name ) )
+            except Exception as e:
+                print("La descarga fallo") 
+                print(e)          
+            ##################################    
+            ######### setting upload #########   
+            ##################################
+            try:
+                self.bucket_upload= self.storage_client.bucket('archivos_cargados')
+                blob_upload = self.bucket_upload.blob(self.tabla.split('.')[0].upper() +'/'+ self.source_blob_name) # how we could find this shit in storage
+                blob_upload.upload_from_filename(self.destination_file_name) # self.destination_file_name show as how the file is in our local folder 
+                
+                print("Blob {} loaded to {}.".format(self.destination_file_name ,'archivos_cargados' +'/'+ self.tabla+'/'+self.source_blob_name ) )
+                
+            except Exception as e:
+                print("La carga fallo")
+                print(e)     
+                
+            ##################################    
+            ######### setting upload #########   
+            ##################################                 
+            try:
+                self.bucket_delete = self.storage_client.bucket(self.bucket)
+                blob_delete = self.bucket_delete.blob(self.source_blob_name)
+                blob_delete.delete()
+ 
+                print("Blob {} delete from {}.".format(self.source_blob_name, self.bucket +'/'+self.source_blob_name  ) )
+            except Exception as e:
+                print("La delete fallo")
+                print(e)
+                
+                
+                
             return   [self.destination_file_name, self.source_blob_name[1]  ]     
         else:
             print("The object you are looking for is not a file into GCP ")
@@ -198,7 +219,7 @@ class descarga:
             
             
 class read_load_class:
-    def __init__(self,tabla_de_interes = [] ,Dataset="",correos=[""],project_id="",SENDGRID_API_KEY="" , service_account = {}):  
+    def __init__(self,tabla_de_interes = [] ,Dataset="",correos=[""],project_id="",SENDGRID_API_KEY="" , service_account = """"""""):  
         
         # Instance Variable 
         self.tabla = tabla_de_interes[0]
@@ -284,7 +305,7 @@ class read_load_class:
             "i need to get the table and then read, normalize colnames and then sent to bq"
         
         elif (self.formato_.upper() == 'CSV'  or self.formato_.upper() == 'TXT' ) :
-            Data  =  pd.read_csv(self.tabla, sep=self.delimitador(), encoding= self.econde_tabla() )
+            Data  =  pd.read_csv(self.file_, sep=self.delimitador(), encoding= self.econde_tabla() )
             
             return Data
         elif (self.formato_.upper() == 'XLS' or self.formato_.upper() == 'XLSX' ):    
@@ -363,36 +384,60 @@ class read_load_class:
             RESULTADO = job.result()  # Wait for the job to complete. 
         except Exception as e:
             RESULTADO =  e
+            # RESULTADO =  e
             
 
         
+        table_error = "{}.STAGING_DATA_WRANGLING.dw_{} ".format(self.project_id,  table_in_bq  )
+        # bq_client.get_table(table_dest_bq)
+        try:
+            bq_client.get_table(table_error)
+            error = 'ok'
+        except Exception as e: 
+            error = 'fail'
+            
+        if error == 'ok':           
+            
+            print('se cargo la tabla a BQ adecuadamente')
+            table_dest_bq = "{}.{}.{}".format(self.project_id, self.Dataset , table_in_bq  )
+
+                ####PARAMETROS PARA EL MENSAJE
+            sql = """
+                CREATE OR REPLACE TABLE  {}
+                OPTIONS () AS 
+                SELECT *, SAFE_CAST(CURRENT_DATE() AS STRING)  AS AUDITORIA_CARGA  FROM {}.STAGING_DATA_WRANGLING.dw_{} 
+                """.format(table_dest_bq, self.project_id  ,table_in_bq)
 
 
+            job_config = bigquery.QueryJobConfig()
+            job_config.allow_large_results = True
+            query_job = bq_client.query( sql,  location='US',  job_config=job_config)  # API request - starts the query
+            query_job.result()  # Wait for the job to complete.
+            print('se leyo el primer query donde se crea la base ')
 
-        #return RESULTADO # [df,  schema_, df.columns ]
+             # Make an API request.
+        else:
+            
+            print('se cargo la tabla a BQ adecuadamente')
+            table_dest_bq = "{}.{}.{}".format(self.project_id, self.Dataset , table_in_bq  )
 
-    
-    
-        print('se cargo la tabla a BQ adecuadamente')
-        table_dest_bq = "{}.{}.{}".format(self.project_id, self.Dataset , table_in_bq  )
+                ####PARAMETROS PARA EL MENSAJE
+            sql = """
+                CREATE OR REPLACE TABLE  {}
+                OPTIONS () AS 
+                SELECT *, SAFE_CAST(CURRENT_DATE() AS STRING)  AS AUDITORIA_CARGA FROM {}.{}.{} 
+                """.format(table_dest_bq,self.project_id ,temp_dataset, table_in_bq)
 
-            ####PARAMETROS PARA EL MENSAJE
-        sql = """
-            CREATE OR REPLACE TABLE  {}
-            OPTIONS () AS 
-            SELECT * FROM {}.STAGING_DATA_WRANGLING.dw_{} 
-            """.format(table_dest_bq, self.project_id  ,table_in_bq)
-        
 
-        job_config = bigquery.QueryJobConfig()
-        job_config.allow_large_results = True
-        query_job = bq_client.query( sql,  location='US',  job_config=job_config)  # API request - starts the query
-        query_job.result()  # Wait for the job to complete.
-        print('se leyo el primer query donde se crea la base ')
- 
+            job_config = bigquery.QueryJobConfig()
+            job_config.allow_large_results = True
+            query_job = bq_client.query( sql,  location='US',  job_config=job_config)  # API request - starts the query
+            query_job.result()  # Wait for the job to complete.
+            
+            print('se leyo el primer query donde se crea la base ')
+
         table = bq_client.get_table(table_dest_bq)  # Make an API request.
-    
-    
+            
         message = Mail(
             to_emails=self.Correos,
             from_email=Email('observatoriodesalud@saludcapital.gov.co', "SDS, Observatorio de Salud de Bogota"),
@@ -413,22 +458,313 @@ class read_load_class:
             response = sg.send(message)
         
         except Exception as e:
-            message = Mail(
-                to_emails=self.Correos,
-                from_email=Email('observatoriodesalud@saludcapital.gov.co', "SDS, Observatorio de Salud de Bogota"),
-                subject="Falla al cargar el archivo " +str(self.tabla ),
-                html_content="Buen día" + "<br>" +  "Espero este mensaje les encuentre bien" + "<br>" +   "<br>" +
-            "EL archivo se no ha cargado correctamente en BigQuery." + "<br>" + 
-            "El archivo referente a la fehca {}: ".format(self.auditoria)+  "<br>" +
-            "Esta base comprende de: " + str(Data.shape[0]) + " filas y de "+str(Data.shape[1]) + " columnas"+"<br>"+
+#             message = Mail(
+#                 to_emails=self.Correos,
+#                 from_email=Email('observatoriodesalud@saludcapital.gov.co', "SDS, Observatorio de Salud de Bogota"),
+#                 subject="Falla al cargar el archivo " +str(self.tabla ),
+#                 html_content="Buen día" + "<br>" +  "Espero este mensaje les encuentre bien" + "<br>" +   "<br>" +
+#             "EL archivo se no ha cargado correctamente en BigQuery." + "<br>" + 
+#             "El archivo referente a la fehca {}: ".format(self.auditoria)+  "<br>" +
+#             "Esta base comprende de: " + str(Data.shape[0]) + " filas y de "+str(Data.shape[1]) + " columnas"+"<br>"+
              
-            "Saludos"+"<br>" +
-            "Equipo del observatorio"+"<br>" +
-            "Sistema Intgrado de la Secretaria de Salud "  
-                    ) 
-            sg = SendGridAPIClient(self.SENDGRID_API_KEY)
-            response = sg.send(message)    
+#             "Saludos"+"<br>" +
+#             "Equipo del observatorio"+"<br>" +
+#             "Sistema Intgrado de la Secretaria de Salud "  
+#                     ) 
+#              try:
+#                 sg = SendGridAPIClient(self.SENDGRID_API_KEY)
+#                 response = sg.send(message)
+#             except: 
+            pass
         #############################################################################
         end = time.time()
         total= end - self.start
         print('timepo total de cargue '+str( round(total/60, 0) ) + ' minutos')
+  
+
+        
+
+class load_simple_file_class:
+    def __init__(self,tabla_de_interes = "" ,Dataset="",correos=[""],project_id="",SENDGRID_API_KEY="" , service_account = {}, AUDITORIA_GCP = None, delimit = ""):  
+        
+        # Instance Variable 
+        self.tabla =tabla_de_interes
+        self.auditoria = str(AUDITORIA_GCP )
+        self.emil = correos
+        self.project_id = project_id
+        self.SENDGRID_API_KEY = SENDGRID_API_KEY
+        self.formato_ = tabla_de_interes.split('.')[-1].upper()
+        self.table_name = tabla_de_interes.split('/')[-1].upper().split('.')[0]  
+        self.cuenta  = service_account
+        self.Dataset = Dataset
+        self.Correos = correos
+        self.SENDGRID_API_KEY = SENDGRID_API_KEY
+        self.credentials = sa.Credentials.from_service_account_info( service_account   )  
+        self.delimit = delimit
+        
+    def econde_tabla(self): 
+        if (self.formato_.upper() == 'CSV') or (self.formato_.upper() == 'TXT'):        
+            import chardet
+
+            with open(self.tabla, 'rb') as rawdata:
+                result = chardet.detect(rawdata.read(10000))
+
+            return result['encoding']
+        else:
+            pass
+
+    def delimitador(self):
+        if self.delimit == "":
+            x = 15
+            if (self.formato_.upper() == 'CSV') or (self.formato_.upper() == 'TXT'):
+                self.encode = self.econde_tabla( )
+                if pd.read_csv(self.tabla, sep=',', encoding= self.encode , nrows = 1).shape[1]>x:
+                    sep_ = ','
+                elif pd.read_csv(self.tabla, sep=';', encoding= self.encode, nrows = 1).shape[1]>x:
+                    sep_ = ';'
+                elif pd.read_csv(self.tabla, sep='|', encoding= self.encode, nrows = 1).shape[1]>x:
+                    sep_ = '|'
+                elif pd.read_csv(self.tabla, sep=':', encoding= self.encode, nrows = 1).shape[1]>x:
+                    sep_ = ':'  
+                else:
+                    pass  
+                return sep_          
+            else:
+                pass
+        else:
+            sep_ = self.delimit
+            return sep_  
+         
+
+    def types_dict(self):
+        if self.formato_.upper() == 'CSV'  or self.formato_.upper() == 'TXT' :
+            col_names = pd.read_csv(self.tabla,sep= self.delimitador(), nrows=0, encoding =  self.econde_tabla() ).columns
+            types_dict_ = { }
+            types_dict_.update({col: str for col in col_names  })
+            return types_dict_
+        elif self.formato_.upper() == 'XLS' or self.formato_.upper() == 'XLSX':
+            col_names = pd.read_excel(self.tabla, nrows = 1 )
+            types_dict_ = { }
+            types_dict_.update({col: str for col in col_names  })
+            return types_dict_
+        elif self.formato_.upper() == 'XLSB' :
+            col_names = pd.read_excel(self.tabla, nrows = 1 )
+            types_dict_ = { }
+            types_dict_.update({col: str for col in col_names  })
+            return types_dict_
+        else:
+            pass
+        
+        print('reading parameters have been set');
+
+
+    def unziping_(self ):
+        if (self.formato_.upper() == 'ZIP'):
+            zipfile.ZipFile(self.tabla , 'r').extractall(os.getcwd()   + '/' + self.tabla.upper().replace('.ZIP','')   )
+            return os.listdir(os.getcwd() + '/' + self.tabla.upper().replace('.ZIP','')  )
+            "listing a table of files to load into bq"
+            "and then read each one for loading"
+        elif (self.formato_.upper() == 'RAR'):
+            patoolib.extract_archive(self.tabla , outdir= os.getcwd()  + '/' + self.tabla.upper().replace('.RAR','')   )
+            return os.listdir(os.getcwd() + '/' + self.tabla.upper().replace('.RAR','')  )
+        else:
+            pass
+ 
+    def read_tables(self):
+        self.start = time.time()
+        if (self.formato_.upper() == 'ZIP'  or self.formato_.upper() == 'RAR'):
+            pass
+            "i need to get the table and then read, normalize colnames and then sent to bq"
+        
+        elif (self.formato_.upper() == 'CSV'  or self.formato_.upper() == 'TXT' ) :
+            try:
+                Data  =  pd.read_csv(self.tabla, sep=self.delimitador(), encoding= self.econde_tabla(),   warn_bad_lines=False, error_bad_lines=False )
+            except:
+                Data = pd.read_csv(self.tabla, sep=self.delimitador(), encoding= self.econde_tabla(),engine = 'python',    warn_bad_lines=False, error_bad_lines=False )
+            
+            return Data
+        elif (self.formato_.upper() == 'XLS' or self.formato_.upper() == 'XLSX' ):    
+            
+            Data  = pd.read_excel(self.tabla, converters = self.types_dict())
+            
+            return Data
+        else:
+            pass
+    def read_table(self):
+        start = time.time()
+        def normalize_(s):
+            replacements = (
+                (" ","_")    ,("á", "a"),("à", "a"),
+                ("é", "e"),("è", "e"),
+                ("í", "i"),('ï»¿',''), ("ì","i"), ("ó","o"),  ("ò","o"),  ("ö","o"),
+                ("ú", "u"),("ù", "u"), ("ü", "u"), ("û", "u"),  
+                ("ñ", "n"), ("*",""),
+                ######################################################                
+                ('├í','a'),  ("├®","e"), ('├¡','i'), ('├│','o'),
+                ('├║','u'), ('├▒','ni'),  
+                ('├ü','A'),('├Ç','A'),('├ç','A'),(":","_"),
+                ('├ë','E'),("├ë","E"),("├ê","E"),("╔","E"),
+                ('├ì','I'),("├î","I"),('├û','I'),('├Å','I'),
+                ('├ô','O'),('├ï','O'),('├è','O'),('@', 'O'),
+                ('├Ö','U'),
+                ('├æ','Ñ'),('├É','ni'),('├æ','Ñ'),('Ð','ni'),
+                ('├Ü','U'),
+                ('├û','Í'  )  , ("\n","_"),
+                ###############################################################
+                (".", "_"), ("/","_"),("\\", "_"), (")", "_"),("(", "_"),('>',''), ('<',''),
+                ("\¿", ""),("\?", ""),(" ", "_"),(",", "_"),("__", "_"),("-", ""),
+                ("/¿", ""),("/?", ""),
+                ("0_", "X0_"), ("1_", "X1_"),("2_", "X2_"),("3_", "X3_"), ("4_", "X4_"),
+                ("5_", "X5_"),("6_", "X6_"),("7_", "X7_"),("8_", "X8_"),("9_", "X9_"),
+                ("__", "_"),  (" ", "_"),  (" ", "_")
+             )
+            for a, b in replacements:
+                
+                s = s.replace(a, b).replace(a.upper(), b.upper()).strip().lstrip('1').lstrip('2').lstrip('3').lstrip(
+                        '4').lstrip('5').lstrip('6').lstrip('7').lstrip('8').lstrip('9').lstrip('0').lstrip(
+                        '_').rstrip('_').strip(' ').rstrip().replace("á", "a").replace("é", "e").replace("í", "i").replace("ó", "o").replace("ú", "u") 
+                R = re.sub(r"[^a-zA-Z0-9]","",s.upper()) 
+            return R
+        
+        nombre_columnas = []
+        Data = self.read_tables()
+        Data['AUDITORIA_GCP'] = self.auditoria
+        for i in range(len(Data.columns)):
+            if normalize_(pd.DataFrame(list(Data.columns), columns =['columnas']).columnas[i].upper() )[0:20] == 'AUDITORIA_GCP':
+                lista = 'AUDITORIA_GCP'
+                nombre_columnas.append(lista)
+            else:
+                lista  = normalize_(pd.DataFrame(list(Data.columns), columns =['columnas']).columnas[i].upper() )[0:20]  + str("_{}".format(i))
+                nombre_columnas.append(lista)
+ 
+ 
+        
+        Data.columns = nombre_columnas
+        schema_ = []
+        for i in Data.columns:
+            schema_line   =   bigquery.SchemaField("""{}""".format(i), 'STRING' , mode = 'NULLABLE')
+            schema_.append(schema_line)
+        print('esquema creado correctamente')
+        
+        return [Data, schema_, nombre_columnas]
+        
+        ##############################################
+        #### Loading table on BQ
+    def load_simple_file_in_bq(self):      
+        bq_client = bigquery.Client(credentials=self.credentials, project=self.credentials.project_id,)
+        ### JAIME MK TU YO DEL PASADO TE RECUERDA QUE NO PUEDES OLVIDAR EL PUTO GUION BAJO
+        ##### NO OLVIDAR
+        ### Tengo que cambiar el guin abajo #############################################################################
+        table_in_bq = self.tabla.split('/')[-1].split('.')[0].replace(" ", "_").replace("-", "_")
+        temp_dataset = 'STAGING_SECRETARIA_SALUD'
+        #self.Dataset 
+        Table_read = self.read_table()
+        Data = Table_read[0].astype(str)
+        Schema_ = Table_read[1]
+
+        self.table_id = "{}.{}.{}".format( self.project_id, temp_dataset, table_in_bq )
+        job_config = bigquery.LoadJobConfig( schema= Schema_, write_disposition='WRITE_TRUNCATE' )
+        
+        print("El esquema se utilizó correctamente" )
+        # try:
+ 
+        job = bq_client.load_table_from_dataframe(Data, self.table_id , job_config=job_config )
+        RESULTADO = job.result()  # Wait for the job to complete. 
+        # except Exception as e:
+            # RESULTADO =  e
+            
+
+        
+        table_error = "{}.STAGING_DATA_WRANGLING.dw_{} ".format(self.project_id,  table_in_bq  )
+        # bq_client.get_table(table_dest_bq)
+        try:
+            bq_client.get_table(table_error)
+            error = 'ok'
+        except Exception as e: 
+            error = 'fail'
+            
+        if error == 'ok':           
+            
+            print('se cargo la tabla a BQ adecuadamente')
+            table_dest_bq = "{}.{}.{}".format(self.project_id, self.Dataset , table_in_bq  )
+
+                ####PARAMETROS PARA EL MENSAJE
+            sql = """
+                CREATE OR REPLACE TABLE  {}
+                OPTIONS () AS 
+                SELECT *, SAFE_CAST(CURRENT_DATE() AS STRING)  AS AUDITORIA_CARGA  FROM {}.STAGING_DATA_WRANGLING.dw_{} 
+                """.format(table_dest_bq, self.project_id  ,table_in_bq)
+
+
+            job_config = bigquery.QueryJobConfig()
+            job_config.allow_large_results = True
+            query_job = bq_client.query( sql,  location='US',  job_config=job_config)  # API request - starts the query
+            query_job.result()  # Wait for the job to complete.
+            print('se leyo el primer query donde se crea la base ')
+
+             # Make an API request.
+        else:
+            
+            print('se cargo la tabla a BQ adecuadamente')
+            table_dest_bq = "{}.{}.{}".format(self.project_id, self.Dataset , table_in_bq  )
+
+                ####PARAMETROS PARA EL MENSAJE
+            sql = """
+                CREATE OR REPLACE TABLE  {}
+                OPTIONS () AS 
+                SELECT *, SAFE_CAST(CURRENT_DATE() AS STRING)  AS AUDITORIA_CARGA FROM {}.{}.{} 
+                """.format(table_dest_bq,self.project_id ,temp_dataset, table_in_bq)
+
+
+            job_config = bigquery.QueryJobConfig()
+            job_config.allow_large_results = True
+            query_job = bq_client.query( sql,  location='US',  job_config=job_config)  # API request - starts the query
+            query_job.result()  # Wait for the job to complete.
+            
+            print('se leyo el primer query donde se crea la base ')
+
+        table = bq_client.get_table(table_dest_bq)  # Make an API request.
+            
+        message = Mail(
+            to_emails=self.Correos,
+            from_email=Email('observatoriodesalud@saludcapital.gov.co', "SDS, Observatorio de Salud de Bogota"),
+            subject="Carga exitosa del archivo " +str(self.tabla ),
+            html_content="Buen día" + "<br>" +  "Espero este mensaje les encuentre bien" + "<br>" +   "<br>" +
+            "EL archivo se ha cargado correctamente en BigQuery." + "<br>" + 
+            "El archivo referente a la fehca {}: ".format(self.auditoria)+  "<br>" +
+            "Esta base comprende de: " + str(Data.shape[0]) + " filas y de "+str(Data.shape[1]) + " columnas"+"<br>"+
+            
+            "El archivo consolidado  contiene {} filas y {} columnas to {}".format(table.num_rows, len(table.schema), table_dest_bq)+ "<br>" +
+            
+            "Saludos"+"<br>" +
+            "Equipo del observatorio"+"<br>" +
+            "Sistema Intgrado de la Secretaria de Salud "    )
+        
+        try:
+            sg = SendGridAPIClient(self.SENDGRID_API_KEY)
+            response = sg.send(message)
+        
+        except Exception as e:
+#             message = Mail(
+#                 to_emails=self.Correos,
+#                 from_email=Email('observatoriodesalud@saludcapital.gov.co', "SDS, Observatorio de Salud de Bogota"),
+#                 subject="Falla al cargar el archivo " +str(self.tabla ),
+#                 html_content="Buen día" + "<br>" +  "Espero este mensaje les encuentre bien" + "<br>" +   "<br>" +
+#             "EL archivo se no ha cargado correctamente en BigQuery." + "<br>" + 
+#             "El archivo referente a la fehca {}: ".format(self.auditoria)+  "<br>" +
+#             "Esta base comprende de: " + str(Data.shape[0]) + " filas y de "+str(Data.shape[1]) + " columnas"+"<br>"+
+             
+#             "Saludos"+"<br>" +
+#             "Equipo del observatorio"+"<br>" +
+#             "Sistema Intgrado de la Secretaria de Salud "  
+#                     ) 
+#              try:
+#                 sg = SendGridAPIClient(self.SENDGRID_API_KEY)
+#                 response = sg.send(message)
+#             except: 
+            pass
+        #############################################################################
+        end = time.time()
+        total= end - self.start
+        print('timepo total de cargue '+str( round(total/60, 0) ) + ' minutos')
+  
