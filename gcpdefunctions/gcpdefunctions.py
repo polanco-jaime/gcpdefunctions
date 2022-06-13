@@ -3,6 +3,11 @@
 # Created 12/02/2022 by Jaime Polanco
 # Last modified  18/04/2022 by Jaime Polanco
 # sudo git clone https://github.com/JAPJ182/GCP_data_eng_functions.git
+# -*- coding: utf-8 -*-
+## FUNCTION CLASS DESTINATED TO DOWNLOAD TABLES FROM GS, SHAREPOINT, FTP ORMONGO  
+# Created 12/02/2022 by Jaime Polanco
+# Last modified  18/04/2022 by Jaime Polanco
+# sudo git clone https://github.com/JAPJ182/GCP_data_eng_functions.git
 
 ##############################################
 # Requirements
@@ -42,7 +47,7 @@ class descarga:
  
     ### Constructor
     def __init__(self,tabla = "",bucket="" ,project_id="" , service_account = {}, source = "", 
-                Usuario="",Contrasena="",Servidor="",Puerto="",Archivos=[""] ):  
+                Usuario="",Contrasena="",Servidor="",Puerto="",Archivos=[""], state = "PRODUCTION" ):  
         
         # Instance Variable 
         self.tabla = tabla
@@ -56,6 +61,7 @@ class descarga:
         self.Puerto = Puerto
         self.Archivos = Archivos
         self.credentials = sa.Credentials.from_service_account_info( service_account   )  
+        self.state = state
         
         ### setting conection and getting the last table    
     def blod_add(self):
@@ -86,7 +92,7 @@ class descarga:
                 elif (self.tabla.upper() in item.name.upper()) and (self.bucket != "proyecto-covid-sds.appspot.com"):
                     try:
                         df = [item.name , # NAME  1 
-                              pd.to_datetime(item.name.replace('otro.','').split('/')[-1].split('.')[1], format = '%d-%m-%Y')  ,  # DATE 2
+                             #  pd.to_datetime(item.name.replace('otro.','').split('/')[-1].split('.')[1], format = '%d-%m-%Y')  ,  # DATE 2
                               item.name.split('/')[-1]  , # file_name 3 
                               '.ZIP' in item.name.upper()  , # El archivo es zip 4
                               '---' in item.name.upper() ,  # El archivo fue importado por el servicio web 5
@@ -128,7 +134,11 @@ class descarga:
              
             folder = self.tabla
             self.bucket_dest = 'archivos_cargados'
-            self.destination_file_name = self.tabla.split('.')[0].upper().replace('.XLSX', '').replace('.CSV', '').replace('.XLS', '').replace('.ZIP', '').replace('.RAR', '')  + self.formato
+            formato =  self.tabla.split('.')[-1].upper()
+            if formato == 'ZIP':
+                self.destination_file_name = self.tabla.split('.')[0].upper().replace('.XLSX', '').replace('.CSV', '').replace('.XLS', '').replace('.ZIP', '').replace('.RAR', '')  + self.formato
+            else:
+                 self.destination_file_name = self.tabla.split('.')[0].replace('.xlsx', '').replace('.csv', '').replace('.xls', '')  + self.formato
             ##################################
             ######### setting download #########
             ##################################
@@ -145,10 +155,10 @@ class descarga:
             ##################################
             try:
                 self.bucket_upload= self.storage_client.bucket('archivos_cargados')
-                blob_upload = self.bucket_upload.blob(self.tabla.split('.')[0].upper() +'/'+ self.source_blob_name) # how we could find this shit in storage
+                blob_upload = self.bucket_upload.blob(self.tabla.split('.')[0].upper() +'/'+ self.source_blob_name.split('/')[-1] ) # how we could find this shit in storage
                 blob_upload.upload_from_filename(self.destination_file_name) # self.destination_file_name show as how the file is in our local folder 
                 
-                print("Blob {} loaded to {}.".format(self.destination_file_name ,'archivos_cargados' +'/'+ self.tabla+'/'+self.source_blob_name ) )
+                print("Blob {} loaded to {}.".format(self.destination_file_name ,'archivos_cargados' +'/'+ self.tabla.split('.')[0].upper() + '/'+self.source_blob_name.split('/')[-1] ) )
                 
             except Exception as e:
                 print("La carga fallo")
@@ -160,9 +170,12 @@ class descarga:
             try:
                 self.bucket_delete = self.storage_client.bucket(self.bucket)
                 blob_delete = self.bucket_delete.blob(self.source_blob_name)
-                blob_delete.delete()
- 
-                print("Blob {} delete from {}.".format(self.source_blob_name, self.bucket +'/'+self.source_blob_name  ) )
+                if self.state =="PRODUCTION":
+                    blob_delete.delete()
+                else:
+                    pass
+                 
+                print("Blob {} deleted from {}.".format(self.source_blob_name, self.bucket +'/'+self.source_blob_name  ) )
             except Exception as e:
                 print("La delete fallo")
                 print(e)
@@ -288,13 +301,17 @@ class read_load_class:
 
     def unziping_(self ):
         if (self.formato_.upper() == 'ZIP'):
-            zipfile.ZipFile(self.tabla , 'r').extractall(os.getcwd()   + '/' + self.tabla.upper().replace('.ZIP','')   )
-            return os.listdir(os.getcwd() + '/' + self.tabla.upper().replace('.ZIP','')  )
+            zipfile.ZipFile(self.tabla , 'r').extractall(#os.getcwd()   + '/' +
+                                                         self.tabla.upper().replace('.ZIP','')   )
+            return os.listdir(#os.getcwd() + '/' + 
+                              self.tabla.upper().replace('.ZIP','')  )
             "listing a table of files to load into bq"
             "and then read each one for loading"
         elif (self.formato_.upper() == 'RAR'):
-            patoolib.extract_archive(self.tabla , outdir= os.getcwd()  + '/' + self.tabla.upper().replace('.RAR','')   )
-            return os.listdir(os.getcwd() + '/' + self.tabla.upper().replace('.RAR','')  )
+            patoolib.extract_archive(#self.tabla , outdir= os.getcwd()  + '/' +
+                                     self.tabla.upper().replace('.RAR','')   )
+            return os.listdir(#os.getcwd() + '/' +
+                              self.tabla.upper().replace('.RAR','')  )
         else:
             pass
  
@@ -305,7 +322,7 @@ class read_load_class:
             "i need to get the table and then read, normalize colnames and then sent to bq"
         
         elif (self.formato_.upper() == 'CSV'  or self.formato_.upper() == 'TXT' ) :
-            Data  =  pd.read_csv(self.file_, sep=self.delimitador(), encoding= self.econde_tabla() )
+            Data  =  pd.read_csv(self.tabla, sep=self.delimitador(), encoding= self.econde_tabla() )
             
             return Data
         elif (self.formato_.upper() == 'XLS' or self.formato_.upper() == 'XLSX' ):    
@@ -494,7 +511,7 @@ class load_simple_file_class:
         self.project_id = project_id
         self.SENDGRID_API_KEY = SENDGRID_API_KEY
         self.formato_ = tabla_de_interes.split('.')[-1].upper()
-        self.table_name = tabla_de_interes.split('/')[-1].upper().split('.')[0]  
+        self.table_name = tabla_de_interes.split('/')[-1].upper().split('.')[0]
         self.cuenta  = service_account
         self.Dataset = Dataset
         self.Correos = correos
@@ -655,7 +672,8 @@ class load_simple_file_class:
         ### JAIME MK TU YO DEL PASADO TE RECUERDA QUE NO PUEDES OLVIDAR EL PUTO GUION BAJO
         ##### NO OLVIDAR
         ### Tengo que cambiar el guin abajo #############################################################################
-        table_in_bq = self.tabla.split('/')[-1].split('.')[0].replace(" ", "_").replace("-", "_")
+        table_in_bq = self.tabla.split('/')[-1].rsplit('.', 1)[0].replace('.','_').replace('[','').replace(']','').replace(" ", "_").replace("-", "_")
+
         temp_dataset = 'STAGING_SECRETARIA_SALUD'
         #self.Dataset 
         Table_read = self.read_table()
