@@ -67,16 +67,16 @@ class load_simple_file_class:
         if (self.formato_.upper() == 'CSV') or (self.formato_.upper() == 'TXT'):
             self.encode = self.econde_tabla( )
             if pd.read_csv(self.tabla, sep=',', encoding= self.encode , nrows = 1).shape[1]>4:
-                sep_ = ','
+                return ','
             elif pd.read_csv(self.tabla, sep=';', encoding= self.encode, nrows = 1).shape[1]>4:
-                sep_ = ';'
+                return ';'
             elif pd.read_csv(self.tabla, sep='|', encoding= self.encode, nrows = 1).shape[1]>4:
-                sep_ = '|'
+                return '|'
             elif pd.read_csv(self.tabla, sep=':', encoding= self.encode, nrows = 1).shape[1]>4:
-                sep_ = ':'  
+                return ':'  
             else:
                 pass  
-            return sep_          
+                      
         else:
             pass
         #def reading_format
