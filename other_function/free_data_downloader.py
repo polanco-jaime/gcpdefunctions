@@ -105,7 +105,7 @@ if (uso_de_datos.upper() in 'YES'):
 
   table_info = client.get_table("{}.{}".format(soucer_,  tabla_name))
 
-  cols =   str(len(["{0} {1}".format(schema.name,schema.field_type) for schema in table_info.schema]))
+  cols =    (len(["{0} {1}".format(schema.name,schema.field_type) for schema in table_info.schema]))
   print("-_- -_- -_- -_- -_- -_- -_- -_-   -_- -_- -_- -_- -_-" )
   print("-_- -_- -_- -_- -_- -_- -_- -_-   -_- -_- -_- -_- -_-" )
   print("-_- -_- -_- -_- -_- -_- -_- -_-   -_- -_- -_- -_- -_-" )
@@ -131,6 +131,11 @@ if (uso_de_datos.upper() in 'YES'):
   print(">>" )
   try:
     df = download_table(tabla = tabla_name )
+    import time
+    resting_time = cols*(table_info.num_rows)  /1000000
+    print("the system will rest {} minutes, while the table get be downloaded".format( round(resting_time/60,0) ) )
+    time.sleep(resting_time)
+    
     load_log(nombre = nombre,  email = email, Downloaded_table = tabla_name , fecha_y_hora_bogota = fecha_y_hora_bogota)  
   except:
     pass
