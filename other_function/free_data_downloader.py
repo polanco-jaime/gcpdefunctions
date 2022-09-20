@@ -7,6 +7,7 @@ import os
 from datetime import datetime
 from pytz import timezone
 from google.colab import files
+from google.colab import drive
 
 project_id = "lee-javeriana"
 soucer_ = "lee-javeriana.downloading_data"
@@ -52,9 +53,7 @@ def download_table(tabla = ''):
                                   dialect='standard',
                                    use_bqstorage_api=True)
     df.to_csv('{}.csv'.format(tabla), index=False,header=True)
-    files.download('{}.csv'.format(tabla))
-
-    print()
+    print("the table has been downloaded")
 
 def load_log(nombre = '', email = '', Downloaded_table = '',  fecha_y_hora_bogota = None ):
   client = bigquery.Client(credentials=credentials, project= "lee-javeriana")
@@ -134,6 +133,10 @@ if (uso_de_datos.upper() in 'YES'):
     resting_time = cols*(table_info.num_rows)  /500000
     print("the system will rest {} minutes, while the table get be downloaded".format( round(resting_time/60,0) ) )
     df = download_table(tabla = tabla_name )   
+    time.sleep(30)
+    drive.mount('/content/drive')
+    !cp {tabla_name}.csv /content/drive/MyDrive/{tabla_name}.csv
+    files.download('{}.csv'.format(tabla_name))
     time.sleep(resting_time)
     print("""the timeof {} minutes has finished, 
               if you dont get the table please contact to 
