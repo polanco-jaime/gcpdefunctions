@@ -130,12 +130,13 @@ if (uso_de_datos.upper() in 'YES'):
   print("Table Description: {}".format(table_info.description))
   print(">>" )
   try:
-    df = download_table(tabla = tabla_name )
     import time
     resting_time = cols*(table_info.num_rows)  /1000000
     print("the system will rest {} minutes, while the table get be downloaded".format( round(resting_time/60,0) ) )
+    df = download_table(tabla = tabla_name )   
     time.sleep(resting_time)
     
+     
     load_log(nombre = nombre,  email = email, Downloaded_table = tabla_name , fecha_y_hora_bogota = fecha_y_hora_bogota)  
   except:
     pass
