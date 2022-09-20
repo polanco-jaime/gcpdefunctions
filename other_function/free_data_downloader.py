@@ -131,7 +131,7 @@ if (uso_de_datos.upper() in 'YES'):
   print(">>" )
   try:
     import time
-    resting_time = cols*(table_info.num_rows)  /1000000
+    resting_time = cols*(table_info.num_rows)  /500000
     print("the system will rest {} minutes, while the table get be downloaded".format( round(resting_time/60,0) ) )
     df = download_table(tabla = tabla_name )   
     time.sleep(resting_time)
