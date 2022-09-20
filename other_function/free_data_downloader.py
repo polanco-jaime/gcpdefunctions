@@ -136,7 +136,7 @@ if (uso_de_datos.upper() in 'YES'):
     time.sleep(30)
     drive.mount('/content/drive')
     !cp {tabla_name}.csv /content/drive/MyDrive/{tabla_name}.csv
-    files.download('{}.csv'.format(tabla_name))
+    #files.download('{}.csv'.format(tabla_name))
     time.sleep(resting_time)
     print("""the timeof {} minutes has finished, 
               if you dont get the table please contact to 
