@@ -47,7 +47,7 @@ def table_exist(tabla = None):
   
 def download_table(tabla = ''):
     # change
-    sql = "SELECT * FROM `{}.{}` limit 10".format(soucer_,  tabla)
+    sql = "SELECT * FROM `{}.{}`  ".format(soucer_,  tabla)
     df = pandas_gbq.read_gbq(sql, credentials=credentials,
                                   dialect='standard',
                                    use_bqstorage_api=True)
