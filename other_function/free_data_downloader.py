@@ -135,7 +135,10 @@ if (uso_de_datos.upper() in 'YES'):
     print("the system will rest {} minutes, while the table get be downloaded".format( round(resting_time/60,0) ) )
     df = download_table(tabla = tabla_name )   
     time.sleep(resting_time)
-    
+    print("""the timeof {} minutes has finished, 
+              if you dont get the table please contact to 
+              Jaime Polanco <<jaime.polanco@javeriana.edu.co>> and
+               Karen Castaneda  <<k.castaneda@uniandes.edu.co>> """.format( round(resting_time/60,0) ) )
      
     load_log(nombre = nombre,  email = email, Downloaded_table = tabla_name , fecha_y_hora_bogota = fecha_y_hora_bogota)  
   except:
