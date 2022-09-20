@@ -8,7 +8,9 @@ from datetime import datetime
 from pytz import timezone
 from google.colab import files
 from google.colab import drive
+from pathlib import Path
 
+drive.mount('/content/drive')
 project_id = "lee-javeriana"
 soucer_ = "lee-javeriana.downloading_data"
 
@@ -134,8 +136,11 @@ if (uso_de_datos.upper() in 'YES'):
     print("the system will rest {} minutes, while the table get be downloaded".format( round(resting_time/60,0) ) )
     df = download_table(tabla = tabla_name )   
     time.sleep(30)
-    drive.mount('/content/drive')
-    !cp {tabla_name}.csv /content/drive/MyDrive/{tabla_name}.csv
+    
+    import os
+
+    Path("/content/drive/MyDrive/Descargas_de_investigacion").mkdir(parents=True, exist_ok=True)
+    os.system("cp {}.csv /content/drive/MyDrive/Descargas_de_investigacion/{}.csv".format(tabla_name, tabla_name))
     #files.download('{}.csv'.format(tabla_name))
     time.sleep(resting_time)
     print("""the timeof {} minutes has finished, 
