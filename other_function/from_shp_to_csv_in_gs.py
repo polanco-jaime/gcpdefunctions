@@ -54,3 +54,4 @@ class from_shp_to_csv_in_gs:
       command = ('gsutil mv '+ name_document + ' gs://{}/'.format(self.buket_gs))
       import os 
       os.system(command)
+    return shp_file
